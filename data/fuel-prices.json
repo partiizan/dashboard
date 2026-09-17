@@ -1,0 +1,12 @@
+{
+  "source": "AAA Fuel Prices",
+  "date": "2026-09-17",
+  "regular": {
+    "current": 4.4386,
+    "yesterday": 4.3672
+  },
+  "diesel": {
+    "current": 6.3956,
+    "yesterday": 6.3103
+  }
+}
