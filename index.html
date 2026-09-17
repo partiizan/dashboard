@@ -13,7 +13,7 @@
   <div>
     <p class="eyebrow">LIVE DASHBOARD</p>
     <h1>Florida Watch</h1>
-    <p class="sub">Atlantic tropics, Brent crude, gold, silver, and platinum.</p>
+    <p class="sub">Atlantic tropics, major U.S. indexes, Brent crude, gold, silver, and platinum.</p>
   </div>
   <div class="meta">
     <div><span class="status-dot"></span><span id="statusText">Live market widgets</span></div>
@@ -22,7 +22,7 @@
 </header>
 
 <section class="grid">
-  <article class="panel">
+  <article class="panel hurricane-panel">
     <div class="panel-head">
       <div><p class="kicker">NOAA / NHC</p><h2>Atlantic 7-Day Tropical Outlook</h2></div>
       <a class="button-link" href="https://www.nhc.noaa.gov/gtwo.php?basin=atlc&fdays=7" target="_blank" rel="noopener">Open NHC ↗</a>
@@ -33,9 +33,36 @@
     <div class="panel-foot"><span>Official NHC outlook</span><span>Refreshes every 15 min</span></div>
   </article>
 
-  <article class="panel">
+  <article class="panel indices-panel">
     <div class="panel-head">
-      <div><p class="kicker">MARKETS</p><h2>Current Trading Prices</h2></div>
+      <div><p class="kicker">U.S. INDEXES</p><h2>Major Markets</h2></div>
+      <span class="widget-source">TradingView</span>
+    </div>
+    <div class="index-tiles">
+      <div class="price-card tv-card index-card">
+        <div class="tradingview-widget-container">
+          <div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js" async>
+          {"symbols":[["Dow Jones","TVC:DJI|1D"]],"chartOnly":false,"width":"100%","height":"100%","locale":"en","colorTheme":"dark","autosize":true,"showVolume":false,"showMA":false,"hideDateRanges":true,"hideMarketStatus":false,"hideSymbolLogo":false,"scalePosition":"right","scaleMode":"Normal","fontFamily":"Inter, sans-serif","fontSize":"11","noTimeScale":false,"valuesTracking":"1","changeMode":"price-and-percent"}
+          </script>
+        </div>
+      </div>
+
+      <div class="price-card tv-card index-card">
+        <div class="tradingview-widget-container">
+          <div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js" async>
+          {"symbols":[["S&P 500","SP:SPX|1D"]],"chartOnly":false,"width":"100%","height":"100%","locale":"en","colorTheme":"dark","autosize":true,"showVolume":false,"showMA":false,"hideDateRanges":true,"hideMarketStatus":false,"hideSymbolLogo":false,"scalePosition":"right","scaleMode":"Normal","fontFamily":"Inter, sans-serif","fontSize":"11","noTimeScale":false,"valuesTracking":"1","changeMode":"price-and-percent"}
+          </script>
+        </div>
+      </div>
+    </div>
+    <div class="market-note">Current index level with daily point and percentage change. Positive moves display green; negative moves display red.</div>
+  </article>
+
+  <article class="panel commodities-panel">
+    <div class="panel-head">
+      <div><p class="kicker">COMMODITIES</p><h2>Current Trading Prices</h2></div>
       <span class="widget-source">TradingView</span>
     </div>
     <div class="tiles tv-tiles">
