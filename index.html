@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07111f">
+<title>Florida Watch</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main class="shell">
+<header class="topbar">
+  <div>
+    <p class="eyebrow">LIVE DASHBOARD</p>
+    <h1>Florida Watch</h1>
+    <p class="sub">Atlantic tropics, Brent crude, gold, silver, and platinum.</p>
+  </div>
+  <div class="meta">
+    <div><span class="status-dot"></span><span id="statusText">Loading data…</span></div>
+    <div id="lastUpdated">—</div>
+  </div>
+</header>
+
+<section class="grid">
+  <article class="panel">
+    <div class="panel-head">
+      <div><p class="kicker">NOAA / NHC</p><h2>Atlantic 7-Day Tropical Outlook</h2></div>
+      <a class="button-link" href="https://www.nhc.noaa.gov/gtwo.php?basin=atlc&fdays=7" target="_blank" rel="noopener">Open NHC ↗</a>
+    </div>
+    <div class="map-wrap">
+      <img id="nhcMap" src="https://www.nhc.noaa.gov/xgtwo/two_atl_7d0.png" alt="NOAA NHC Atlantic 7-day tropical outlook">
+    </div>
+    <div class="panel-foot"><span>Official NHC outlook</span><span>Refreshes every 15 min</span></div>
+  </article>
+
+  <article class="panel">
+    <div class="panel-head">
+      <div><p class="kicker">MARKETS</p><h2>Current Trading Prices</h2></div>
+      <button id="refreshBtn" class="button-link button-reset" type="button">Refresh</button>
+    </div>
+    <div class="tiles">
+      <div class="price-card"><div class="price-top"><span class="symbol">BRN</span><span class="asset-name">Brent crude</span></div><div class="price" id="brentPrice">—</div><div class="change" id="brentChange">—</div><div class="unit">USD / barrel</div></div>
+      <div class="price-card"><div class="price-top"><span class="symbol">XAU</span><span class="asset-name">Gold</span></div><div class="price" id="goldPrice">—</div><div class="change" id="goldChange">—</div><div class="unit">USD / troy oz</div></div>
+      <div class="price-card"><div class="price-top"><span class="symbol">XAG</span><span class="asset-name">Silver</span></div><div class="price" id="silverPrice">—</div><div class="change" id="silverChange">—</div><div class="unit">USD / troy oz</div></div>
+      <div class="price-card"><div class="price-top"><span class="symbol">XPT</span><span class="asset-name">Platinum</span></div><div class="price" id="platinumPrice">—</div><div class="change" id="platinumChange">—</div><div class="unit">USD / troy oz</div></div>
+    </div>
+    <div class="market-note">Market data uses Yahoo Finance browser requests. Brent is front-month futures; precious metals use futures proxies.</div>
+  </article>
+</section>
+
+<footer><span>Built for GitHub Pages — no server required.</span><span id="clock">—</span></footer>
+</main>
+<script src="./app.js"></script>
+</body>
+</html>
