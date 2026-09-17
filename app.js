@@ -1,8 +1,7 @@
-const FEEDS = {
-  brent: "https://croncopia.com/api/energy/brent_crude.json",
-  gold: "https://croncopia.com/api/metals/gold.json",
-  silver: "https://croncopia.com/api/metals/silver.json",
-  platinum: "https://croncopia.com/api/metals/platinum.json"
+const ENDPOINTS = {
+  metals: "https://goldmarketdaily.com/wp-json/gmd/v1/metals",
+  brentCurrent: "https://croncopia.com/api/energy/brent_crude.json",
+  brentDaily: "https://snapdata.dev/api/v1/crude/world/latest.json"
 };
 
 const money = (value, decimals = 2) => {
@@ -13,43 +12,63 @@ const money = (value, decimals = 2) => {
   });
 };
 
-function extractPrice(asset, data) {
-  if (asset === "brent") return Number(data?.price);
-  return Number(data?.price?.troy_ounce ?? data?.price);
-}
-
-function formatFeedMeta(data) {
-  const parts = [];
-  if (data?.timestamp) {
-    const d = new Date(data.timestamp);
-    if (!Number.isNaN(d.getTime())) {
-      parts.push(`Feed ${d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`);
-    }
-  }
-  if (data?.sources != null) {
-    parts.push(`${data.sources} source${data.sources === 1 ? "" : "s"}`);
-  }
-  return parts.join(" • ") || "Latest available quote";
-}
-
-function paint(asset, data) {
+function paintChange(asset, current, previous, decimals = 2) {
   const priceEl = document.getElementById(`${asset}Price`);
-  const detailEl = document.getElementById(`${asset}Change`);
-  const price = extractPrice(asset, data);
+  const changeEl = document.getElementById(`${asset}Change`);
 
-  if (!Number.isFinite(price)) throw new Error(`Invalid ${asset} price`);
+  if (!Number.isFinite(current)) throw new Error(`Invalid ${asset} price`);
 
-  priceEl.textContent = `$${money(price, asset === "silver" ? 3 : 2)}`;
-  detailEl.textContent = formatFeedMeta(data);
-  detailEl.className = "change flat";
+  priceEl.textContent = `$${money(current, decimals)}`;
+
+  if (!Number.isFinite(previous)) {
+    changeEl.textContent = "Previous close unavailable";
+    changeEl.className = "change flat";
+    return;
+  }
+
+  const delta = current - previous;
+  const pct = previous !== 0 ? (delta / previous) * 100 : null;
+  const sign = delta > 0 ? "+" : "";
+
+  changeEl.textContent = pct == null
+    ? `${sign}$${money(delta, decimals)}`
+    : `${sign}$${money(delta, decimals)} (${sign}${money(pct, 2)}%)`;
+
+  changeEl.className = "change " + (delta > 0 ? "up" : delta < 0 ? "down" : "flat");
 }
 
-async function fetchFeed(asset, url) {
+async function fetchJson(url) {
   const response = await fetch(`${url}?t=${Date.now()}`, { cache: "no-store" });
-  if (!response.ok) throw new Error(`${asset}: HTTP ${response.status}`);
-  const data = await response.json();
-  paint(asset, data);
-  return data;
+  if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
+  return response.json();
+}
+
+async function refreshMetals() {
+  const data = await fetchJson(ENDPOINTS.metals);
+  const metals = data?.metals || {};
+  const prev = data?.prev_close || {};
+
+  paintChange("gold", Number(metals.gold), Number(prev.gold), 2);
+  paintChange("silver", Number(metals.silver), Number(prev.silver), 3);
+  paintChange("platinum", Number(metals.platinum), Number(prev.platinum), 2);
+}
+
+async function refreshBrent() {
+  const [currentData, dailyData] = await Promise.all([
+    fetchJson(ENDPOINTS.brentCurrent),
+    fetchJson(ENDPOINTS.brentDaily)
+  ]);
+
+  const current = Number(currentData?.price);
+  const obs = (dailyData?.observations || []).find(
+    o => o?.instrument_id === "BRENT.USD.BBL"
+  );
+
+  // Snapdata explicitly provides the previous trading day's close/reference.
+  // We compare that with Croncopia's latest Brent quote so the dashboard keeps
+  // an intraday-ish current value while still showing change from prior close.
+  const previous = Number(obs?.prev_close ?? obs?.close ?? obs?.value);
+  paintChange("brent", current, previous, 2);
 }
 
 async function refreshMarkets() {
@@ -60,24 +79,23 @@ async function refreshMarkets() {
   statusText.textContent = "Refreshing markets…";
   dot.style.background = "#fde68a";
 
-  const entries = Object.entries(FEEDS);
-  const results = await Promise.allSettled(
-    entries.map(([asset, url]) => fetchFeed(asset, url))
-  );
+  const results = await Promise.allSettled([
+    refreshBrent(),
+    refreshMetals()
+  ]);
 
-  const ok = results.filter(r => r.status === "fulfilled").length;
+  const brentOk = results[0].status === "fulfilled";
+  const metalsOk = results[1].status === "fulfilled";
 
-  results.forEach((result, index) => {
-    if (result.status === "rejected") {
-      console.error(entries[index][0], result.reason);
-    }
+  results.forEach(result => {
+    if (result.status === "rejected") console.error(result.reason);
   });
 
-  if (ok === entries.length) {
+  if (brentOk && metalsOk) {
     statusText.textContent = "Market data loaded";
     dot.style.background = "#86efac";
-  } else if (ok > 0) {
-    statusText.textContent = `Partial market data (${ok}/${entries.length})`;
+  } else if (brentOk || metalsOk) {
+    statusText.textContent = "Partial market data";
     dot.style.background = "#fde68a";
   } else {
     statusText.textContent = "Market feed unavailable";
@@ -111,8 +129,6 @@ refreshMarkets();
 refreshNHC();
 clock();
 
-// Croncopia refreshes its commodity data periodically; checking every 10 minutes
-// keeps the dashboard current without hammering the static feed.
 setInterval(refreshMarkets, 10 * 60 * 1000);
 setInterval(refreshNHC, 15 * 60 * 1000);
 setInterval(clock, 60 * 1000);
